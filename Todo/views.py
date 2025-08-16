@@ -1,3 +1,44 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect,get_object_or_404
+from .models import Task
+from .forms import TaskForm
 
 # Create your views here.
+
+# for get all data and redirect from the templates
+def task_list(request):
+    task = Task.objects.all() # to get all data
+    return render(request, 'todo/task_list.html', {'task' : task})
+
+# create 
+
+def task_create(request):
+    if request.method == 'POST':
+        form = Task(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('task_list')
+    else:
+        form = TaskForm()
+        return render(request , 'todo/task_list.html', {'form': form})
+    
+# update
+
+def task_update(request,pk):
+    task = get_object_or_404(Task, pk=pk)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('task_list')
+    else:
+        form = TaskForm()
+    return(request, 'todo/task_list.html', {'form': form})
+
+# delete
+
+def task_delete(request,pk):
+    task = get_object_or_404(Task, pk=pk)
+    if request.method == 'POST':
+        task.detele()
+        return redirect('task_list')
+    return render(request, 'todo/task_list.html', {'task': task})
